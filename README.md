@@ -158,7 +158,7 @@ The Node server keeps recent history, runs the same rules, and streams every rea
 ## 7. Repository layout
 
 ```
-florasense/
+FloraSense/
 ├── firmware/FloraSense/
 │   ├── FloraSense.ino          # ESP32 firmware (single setup/loop)
 │   ├── secrets.h.example       # Wi-Fi, ntfy topic, thresholds, server (copy to secrets.h)
@@ -169,7 +169,7 @@ florasense/
 │   ├── notifiers.js            # ntfy and Telegram delivery
 │   └── sources.js              # USB serial reader and demo simulator
 ├── public/                     # dashboard (HTML, CSS, vanilla JS, no build step)
-├── docs/                       # screenshots
+├── docs/                       # dashboard screenshot, hardware test notes
 ├── render.yaml                 # one-click Render blueprint
 ├── config.example.json         # local server config
 └── package.json
