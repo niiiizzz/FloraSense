@@ -170,6 +170,7 @@ FloraSense/
 │   └── sources.js              # USB serial reader and demo simulator
 ├── public/                     # dashboard (HTML, CSS, vanilla JS, no build step)
 ├── docs/                       # dashboard screenshot, hardware test notes
+├── demo.log                    # sample server log from a demo run (alerts firing)
 ├── render.yaml                 # one-click Render blueprint
 ├── config.example.json         # local server config
 └── package.json
