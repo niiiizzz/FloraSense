@@ -17,6 +17,7 @@
 #define SOIL_PIN 34
 #define DHT_PIN 4
 #define DHT_TYPE DHT22
+#define LED_PIN 26              // External alert LED (GPIO 26)
 #define SAMPLE_INTERVAL_MS 2500
 #define POST_INTERVAL_MS 5000   // dashboard upload rate
 
@@ -92,6 +93,7 @@ void evalAlerts(int adc) {
     overCount = adc >= WATER_ABOVE_ADC ? overCount + 1 : 0;
     if (overCount >= CONFIRM_DRY_SAMPLES) {
       thirsty = true; lastReminder = now;
+      digitalWrite(LED_PIN, HIGH); // Turn ON LED: needs water!
       queueAlert(String(PLANT_NAME) + " needs water",
                  String("Soil reading is ") + adc + " (dry above " + WATER_ABOVE_ADC + "). Time for a drink.",
                  "high", "droplet,warning");
@@ -100,11 +102,13 @@ void evalAlerts(int adc) {
     underCount = adc < RECOVERED_BELOW_ADC ? underCount + 1 : 0;
     if (underCount >= CONFIRM_WET_SAMPLES) {
       thirsty = false; overCount = 0; underCount = 0;
+      digitalWrite(LED_PIN, LOW); // Turn OFF LED: plant is watered!
       queueAlert(String(PLANT_NAME) + " has been watered",
                  String("Soil reading dropped to ") + adc + ". All good!",
                  "default", "seedling");
     } else if (REMINDER_MINUTES > 0 && now - lastReminder >= (unsigned long)REMINDER_MINUTES * 60000UL) {
       lastReminder = now;
+      digitalWrite(LED_PIN, HIGH);
       queueAlert(String(PLANT_NAME) + " is still thirsty",
                  String("Soil reading is still ") + adc + ".",
                  "high", "droplet");
@@ -116,12 +120,25 @@ void evalAlerts(int adc) {
 unsigned long lastWifiTry = 0, lastPost = 0, lastSample = 0;
 
 void wifiMaintain() {
-  if (WiFi.status() == WL_CONNECTED) return;
+  static bool wasConnected = false;
+  if (WiFi.status() == WL_CONNECTED) {
+    if (!wasConnected) {
+      wasConnected = true;
+      Serial.println();
+      Serial.print(">>> Wi-Fi CONNECTED! IP: ");
+      Serial.println(WiFi.localIP());
+      Serial.println();
+    }
+    return;
+  }
+  wasConnected = false;
   if (lastWifiTry && millis() - lastWifiTry < 10000) return;
   lastWifiTry = millis();
   WiFi.disconnect();
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.println("Wi-Fi: connecting...");
+  Serial.print("Wi-Fi: connecting to \"");
+  Serial.print(WIFI_SSID);
+  Serial.println("\"...");
 }
 
 void postReading(int soilRaw, float t, float h) {
@@ -152,6 +169,8 @@ void setup() {
   delay(1000);
   analogReadResolution(12);
   pinMode(SOIL_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW); // Start with LED OFF
   dht.begin();
   WiFi.mode(WIFI_STA);
   Serial.println();
