@@ -19,7 +19,7 @@
 #define DHT_TYPE DHT22
 #define LED_PIN 26              // External alert LED (GPIO 26)
 #define SAMPLE_INTERVAL_MS 2500
-#define POST_INTERVAL_MS 5000   // dashboard upload rate
+#define POST_INTERVAL_MS 3000   // dashboard upload rate
 
 DHT dht(DHT_PIN, DHT_TYPE);
 
