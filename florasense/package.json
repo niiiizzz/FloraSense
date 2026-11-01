@@ -1,0 +1,14 @@
+{
+  "name": "florasense",
+  "version": "1.0.0",
+  "description": "FloraSense dashboard + watering notifications for the ESP32 plant monitor",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "demo": "node server/server.js --demo"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "serialport": "^12.0.0"
+  }
+}

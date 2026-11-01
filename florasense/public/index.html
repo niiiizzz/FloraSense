@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FloraSense</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 28V14M16 14C16 8 11 5 5 6c0 6 4 9 11 8zM16 18c0-5 4-8 11-7 0 6-4 9-11 7z' fill='none' stroke='%2352613A' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Silkscreen&family=Work+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true"><path d="M16 28V14M16 14C16 8 11 5 5 6c0 6 4 9 11 8zM16 18c0-5 4-8 11-7 0 6-4 9-11 7z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>FloraSense</span>
+  </div>
+  <div class="top-right">
+    <span id="conn" class="pill"><i class="dot"></i><span id="connText">connecting</span></span>
+    <button id="btnSettings" class="btn ghost">Settings</button>
+  </div>
+</header>
+
+<div id="permBanner" class="banner" hidden>
+  <span>Get a desktop alert the moment your plant is thirsty.</span>
+  <button id="btnPerm" class="btn">Turn on alerts</button>
+</div>
+
+<main>
+  <section class="card hero" id="hero" data-state="waiting">
+    <div class="sprite" id="sprite" aria-hidden="true"></div>
+    <div class="hero-text">
+      <p class="eyebrow">🪴 <span id="plantName">Plant</span> · <span id="sourceName">—</span></p>
+      <h1 id="heroTitle">Listening…</h1>
+      <p id="heroSub" class="sub">Waiting for the first reading from the sensor.</p>
+    </div>
+    <div class="scale" aria-label="Soil dryness scale">
+      <div class="scale-head">
+        <span class="big"><b id="adcBig">—</b><small> ADC (smoothed)</small></span>
+        <span class="muted" id="pctText"></span>
+      </div>
+      <div class="bar">
+        <div class="bar-zone"></div>
+        <div class="tick" id="tickWater"><span>needs water</span></div>
+        <div class="marker" id="marker"></div>
+      </div>
+      <div class="bar-labels"><span>wet</span><span>dry</span></div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <article class="card stat"><p class="eyebrow">🌡️ Air temperature</p><p class="num"><span id="tempVal">—</span><small>°C</small></p><p class="muted" id="tempNote">DHT22</p></article>
+    <article class="card stat"><p class="eyebrow">💧 Humidity</p><p class="num"><span id="humVal">—</span><small>%</small></p><p class="muted" id="humNote">DHT22</p></article>
+    <article class="card stat"><p class="eyebrow">🪴 Soil, raw</p><p class="num"><span id="soilVal">—</span><small>ADC</small></p><p class="muted" id="soilNote">straight from the probe</p></article>
+    <article class="card stat"><p class="eyebrow">⏱️ Last reading</p><p class="num sm"><span id="ago">—</span></p><p class="muted" id="lastAt">&nbsp;</p></article>
+  </section>
+
+  <section class="card chart-card">
+    <div class="chart-head">
+      <div class="tabs" id="metricTabs" role="tablist">
+        <button data-m="soil" class="on">Soil</button>
+        <button data-m="temperature">Temperature</button>
+        <button data-m="humidity">Humidity</button>
+      </div>
+      <div class="tabs" id="rangeTabs">
+        <button data-r="15">15m</button>
+        <button data-r="60" class="on">1h</button>
+        <button data-r="360">6h</button>
+        <button data-r="1440">24h</button>
+      </div>
+    </div>
+    <div id="chart" class="chart"></div>
+  </section>
+
+  <section class="card log">
+    <div class="log-head">
+      <h2>🔔 Notifications</h2>
+      <button id="btnTest" class="btn ghost">🚿 Send test</button>
+    </div>
+    <ul id="events" class="events"><li class="empty">Nothing yet. You'll see every alert here, and whether it reached your phone.</li></ul>
+  </section>
+</main>
+
+<dialog id="settingsDlg">
+  <form method="dialog" id="settingsForm">
+    <header><h2>Settings</h2><button class="btn ghost" value="cancel" formnovalidate>Close</button></header>
+
+    <fieldset>
+      <legend>🪴 Plant</legend>
+      <label>Name <input name="plantName" maxlength="40" placeholder="e.g. Monstera, Tulsi, Money plant"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>🚿 Watering rule</legend>
+      <p class="hint">Lower ADC = wetter soil on this probe. Starting points only. A cactus likes it drier than a fern: tune these to your plant, pot and soil.</p>
+      <div class="grid2">
+        <label>Needs water above <input name="waterAboveAdc" type="number" step="10"></label>
+        <label>Watered again below <input name="recoveredBelowAdc" type="number" step="10"></label>
+        <label>Confirm samples <input name="confirmSamples" type="number" min="1" max="20"></label>
+        <label>Remind every (min, 0 = off) <input name="reminderMinutes" type="number" min="0"></label>
+      </div>
+      <div class="row">
+        <button type="button" class="btn ghost" id="btnUseDry">Use current as “needs water”</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Moisture % (optional)</legend>
+      <p class="hint">Percent stays hidden until you set both points on a settled probe in the same pot.</p>
+      <div class="grid2">
+        <label>Dry point (ADC) <input name="dryAdc" type="number"></label>
+        <label>Wet point (ADC) <input name="wetAdc" type="number"></label>
+      </div>
+      <div class="row">
+        <button type="button" class="btn ghost" id="btnMarkDry">Mark current as dry</button>
+        <button type="button" class="btn ghost" id="btnMarkWet">Mark current as wet</button>
+        <button type="button" class="btn ghost" id="btnClearCal">Clear</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Phone notifications</legend>
+      <p class="hint"><b>ntfy</b> (free, no account): install the ntfy app, subscribe to your topic below, done. Pick something hard to guess.</p>
+      <div class="grid2">
+        <label>ntfy topic <input name="ntfyTopic" placeholder="florasense-yourname-4821" autocomplete="off"></label>
+        <label>ntfy server <input name="ntfyServer" placeholder="https://ntfy.sh"></label>
+        <label>Telegram bot token <input name="telegramBotToken" autocomplete="off"></label>
+        <label>Telegram chat id <input name="telegramChatId" autocomplete="off"></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Environment alerts (placeholders)</legend>
+      <div class="grid2">
+        <label>Too hot above °C <input name="tempHighC" type="number"></label>
+        <label>Too cold below °C <input name="tempLowC" type="number"></label>
+        <label>Humidity above % <input name="humidityHigh" type="number"></label>
+      </div>
+    </fieldset>
+
+    <p id="formMsg" class="form-msg" role="status"></p>
+    <footer><button type="submit" class="btn" id="btnSave" value="save">Save</button></footer>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>

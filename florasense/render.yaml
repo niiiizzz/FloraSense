@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: florasense
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: SERIAL_PORT
+        value: ""
+      - key: SERVER_PUSH
+        value: offline
+      - key: API_KEY
+        generateValue: true
+      - key: DASH_PASSWORD
+        sync: false
+      - key: FLORA_SETTINGS
+        sync: false

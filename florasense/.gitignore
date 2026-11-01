@@ -1,0 +1,5 @@
+node_modules/
+data/
+config.json
+firmware/FloraSense/secrets.h
+FloraSense_Hardware_Test_Observations_and_Software_Handover.md
