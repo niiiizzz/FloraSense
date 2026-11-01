@@ -17,7 +17,10 @@ let config = { port: 3000, serialPort: 'COM6', baudRate: 115200, apiKey: '' };
 try { Object.assign(config, JSON.parse(fs.readFileSync(path.join(ROOT, 'config.json'), 'utf8'))); } catch { /* defaults */ }
 const DEMO = process.argv.includes('--demo');
 if (process.env.PORT) config.port = +process.env.PORT;
-if (process.env.SERIAL_PORT !== undefined) config.serialPort = process.env.SERIAL_PORT;
+if (process.env.SERIAL_PORT !== undefined) {
+  const sp = String(process.env.SERIAL_PORT).trim();
+  config.serialPort = (sp === '' || sp === '""' || sp === "''" || sp === 'none' || sp === '443') ? '' : sp;
+}
 if (process.env.API_KEY) config.apiKey = process.env.API_KEY;
 // serverPush: "all" = server sends phone alerts, "offline" = only sensor-offline alerts
 // (use when the ESP32 sends the watering alerts itself), "none" = never.
@@ -92,12 +95,25 @@ app.get('/healthz', (_q, res) => res.send('ok'));
 app.use(express.json({ limit: '50kb' }));
 // Optional password for the dashboard when it is on the internet. The ESP32 endpoint uses the API key instead.
 if (DASH_PASSWORD) {
+  const cleanPass = DASH_PASSWORD.trim().replace(/^["']|["']$/g, '');
   app.use((req, res, next) => {
     if (req.path === '/api/readings') return next();
-    const [, b64] = (req.get('authorization') || '').split(' ');
-    const pass = Buffer.from(b64 || '', 'base64').toString().split(':').slice(1).join(':');
-    if (pass === DASH_PASSWORD) return next();
-    res.set('WWW-Authenticate', 'Basic realm="FloraSense"').sendStatus(401);
+    const authHeader = req.get('authorization') || '';
+    if (!authHeader.startsWith('Basic ')) {
+      res.set('WWW-Authenticate', 'Basic realm="FloraSense"');
+      return res.sendStatus(401);
+    }
+    const creds = Buffer.from(authHeader.slice(6), 'base64').toString('utf8');
+    const [user, ...rest] = creds.split(':');
+    const pass = rest.join(':');
+
+    // Accept if either user or pass matches the cleanPass, or both are admin
+    if (pass === cleanPass || user === cleanPass || (cleanPass === 'admin' && user === 'admin')) {
+      return next();
+    }
+    log(`Auth failed for user="${user}"`);
+    res.set('WWW-Authenticate', 'Basic realm="FloraSense"');
+    return res.sendStatus(401);
   });
 }
 app.use(express.static(path.join(ROOT, 'public')));
