@@ -111,7 +111,7 @@ if (DASH_PASSWORD) {
     if (pass === cleanPass || user === cleanPass || (cleanPass === 'admin' && user === 'admin')) {
       return next();
     }
-    log(`Auth failed for user="${user}"`);
+    log(`Auth failed: user="${user}", typed password ${pass.length} chars, server expects ${cleanPass.length} chars`);
     res.set('WWW-Authenticate', 'Basic realm="FloraSense"');
     return res.sendStatus(401);
   });
