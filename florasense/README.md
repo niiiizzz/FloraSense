@@ -13,6 +13,10 @@ ESP32 · HW-103 soil probe · DHT22 · ntfy push notifications · live web dashb
 
 </div>
 
+<p align="center">
+  <img src="docs/dashboard.png" alt="FloraSense dashboard showing plant status, wet-to-dry soil scale, temperature, humidity and a live soil chart" width="900">
+</p>
+
 ---
 
 ## Table of contents
@@ -165,6 +169,7 @@ florasense/
 │   ├── notifiers.js            # ntfy and Telegram delivery
 │   └── sources.js              # USB serial reader and demo simulator
 ├── public/                     # dashboard (HTML, CSS, vanilla JS, no build step)
+├── docs/                       # screenshots
 ├── render.yaml                 # one-click Render blueprint
 ├── config.example.json         # local server config
 └── package.json
