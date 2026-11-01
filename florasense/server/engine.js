@@ -2,7 +2,7 @@
 // Pure logic - no I/O - so it is easy to reason about and test.
 
 const DEFAULT_SETTINGS = {
-  plantName: 'My Plant',
+  plantName: 'Your plant',
 
   // Soil direction for THIS hardware: lower ADC = wetter, higher ADC = drier.
   // PLACEHOLDER thresholds picked from the exploratory tests (dry pot ~2200,

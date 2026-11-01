@@ -34,7 +34,7 @@
     const l = st.latest;
     const hero = $('hero');
     hero.dataset.state = st.state;
-    const name = settings ? settings.plantName : 'Your plant';
+    const name = settings ? settings.plantName : "Your plant";
     const copy = {
       waiting: ['Listening…', 'Waiting for the first reading from the sensor.'],
       warming: ['Settling in…', 'Collecting a few readings before judging the soil.'],
