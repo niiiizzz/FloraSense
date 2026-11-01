@@ -18,8 +18,7 @@
 #define DHT_PIN 4
 #define DHT_TYPE DHT22
 #define LED_PIN 26              // External alert LED (GPIO 26)
-#define SAMPLE_INTERVAL_MS 2500
-#define POST_INTERVAL_MS 3000   // dashboard upload rate
+#define SAMPLE_INTERVAL_MS 3000   // one reading + one dashboard upload every 3 s
 
 DHT dht(DHT_PIN, DHT_TYPE);
 
@@ -117,7 +116,7 @@ void evalAlerts(int adc) {
 }
 
 // ---------- Wi-Fi + dashboard upload ----------
-unsigned long lastWifiTry = 0, lastPost = 0, lastSample = 0;
+unsigned long lastWifiTry = 0, lastSample = 0;
 
 void wifiMaintain() {
   static bool wasConnected = false;
@@ -143,8 +142,6 @@ void wifiMaintain() {
 
 void postReading(int soilRaw, float t, float h) {
   if (strlen(SERVER_HOST) == 0 || WiFi.status() != WL_CONNECTED) return;
-  if (millis() - lastPost < POST_INTERVAL_MS) return;
-  lastPost = millis();
   String json = String("{\"soilRaw\":") + soilRaw +
                 ",\"temperature\":" + (isnan(t) ? String("null") : String(t, 1)) +
                 ",\"humidity\":" + (isnan(h) ? String("null") : String(h, 1)) + "}";
